@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Genesis Empresarial Palette - Light Mode */
+    --background: 0 0% 98%; /* Off-white */
+    --foreground: 222.2 47.4% 11.2%; /* Dark Grayish Blue */
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+
+    --primary: 353 91% 56%; /* Genesis Red */
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 221 83% 95%; /* Light Genesis Blue */
+    --secondary-foreground: 221 83% 45%; /* Genesis Blue */
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 221 83% 45%; /* Genesis Blue */
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 84.2% 60.2%; /* Standard Destructive Red */
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221 83% 45%; /* Genesis Blue for rings */
+
+    --radius: 0.5rem;
+    
+    /* Chart colors using Genesis Palette */
+    --chart-1: hsl(var(--accent)); /* Genesis Blue */
+    --chart-2: hsl(var(--primary)); /* Genesis Red */
+    --chart-3: 221 83% 65%; /* Lighter Blue */
+    --chart-4: 353 91% 70%; /* Lighter Red */
+    --chart-5: 221 83% 35%; /* Darker Blue */
+
+    /* Sidebar colors aligned with Genesis theme */
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: hsl(var(--foreground));
+    --sidebar-primary: hsl(var(--primary));
+    --sidebar-primary-foreground: hsl(var(--primary-foreground));
+    --sidebar-accent: hsl(var(--accent));
+    --sidebar-accent-foreground: hsl(var(--accent-foreground));
+    --sidebar-border: hsl(var(--border));
+    --sidebar-ring: hsl(var(--ring));
+  }
+
+  .dark {
+    /* Genesis Empresarial Palette - Dark Mode */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 353 91% 66%; /* Brighter Red for dark mode */
+    --primary-foreground: 355.7 100% 97.3%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 221 83% 55%; /* Brighter Blue for dark mode */
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 221 83% 65%; /* Brighter Blue ring */
+
+    /* Chart colors for dark mode */
+    --chart-1: hsl(var(--accent));
+    --chart-2: hsl(var(--primary));
+    --chart-3: 221 83% 75%; 
+    --chart-4: 353 91% 80%;
+    --chart-5: 221 83% 45%;
+
+    /* Sidebar colors for dark mode */
+    --sidebar-background: 222.2 84% 6.9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: hsl(var(--primary));
+    --sidebar-primary-foreground: hsl(var(--primary-foreground));
+    --sidebar-accent: hsl(var(--accent));
+    --sidebar-accent-foreground: hsl(var(--accent-foreground));
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: hsl(var(--ring));
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* FullCalendar Custom Styles */
+  .fc {
+    --fc-border-color: hsl(var(--border));
+    --fc-daygrid-event-dot-width: 8px;
+    --fc-list-event-dot-width: 10px;
+    --fc-list-event-hover-bg-color: hsl(var(--muted));
+    --fc-today-bg-color: hsla(var(--secondary), 0.5);
+
+    /* Main background color */
+    --fc-neutral-bg-color: transparent;
+
+    /* Button styles */
+    --fc-button-bg-color: hsl(var(--primary));
+    --fc-button-text-color: hsl(var(--primary-foreground));
+    --fc-button-border-color: hsl(var(--primary));
+    --fc-button-hover-bg-color: hsl(var(--primary) / 0.9);
+    --fc-button-hover-border-color: hsl(var(--primary));
+    --fc-button-active-bg-color: hsl(var(--primary) / 0.9);
+    --fc-button-active-border-color: hsl(var(--primary));
+
+    /* Active button (e.g., current view) */
+    --fc-button-active-bg-color: hsl(var(--accent));
+    --fc-button-active-border-color: hsl(var(--accent));
+  }
+
+  .fc .fc-toolbar-title {
+    @apply text-xl font-bold font-headline;
+  }
+
+  .fc .fc-button {
+    @apply rounded-md text-sm;
+  }
+
+  .fc .fc-daygrid-day-number {
+     @apply p-2;
+  }
+
+  .fc .fc-event {
+    @apply rounded-md text-xs p-1 cursor-pointer;
+  }
+}
