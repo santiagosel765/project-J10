@@ -309,7 +309,7 @@ export function EditTemplateForm({ template }: EditTemplateFormProps) {
           name="templateContent"
           render={({ field }) => (
             <FormItem>
-                <FormLabel>{templateType === 'llamada-ia' ? "Tipo de Llamada (call_type)" : "Contenido de la Plantilla"}</FormLabel>
+                <FormLabel>{templateType === 'llamada-ia' ? "Tipo de Llamada (metadata interna)" : "Contenido de la Plantilla"}</FormLabel>
                 <FormControl>
                     {templateType === 'llamada-ia' ? (
                        <Input placeholder="Ej: ventas, cobranza, recordatorio" {...field} disabled={isSubmitting} />
@@ -325,7 +325,7 @@ export function EditTemplateForm({ template }: EditTemplateFormProps) {
                 </FormControl>
                 {templateType === 'llamada-ia' ? (
                     <FormDescription>
-                        Este es el valor que se enviará a la API como <code>call_type</code>.
+                        Identificador interno de la plantilla (no se envía a DAPTA API).
                     </FormDescription>
                 ) : (
                     <FormDescription>

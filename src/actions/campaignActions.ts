@@ -172,66 +172,102 @@ export async function sendSmsMessage(
   }
 }
 
-// --- HiveAI "Llamada IA" Sending Logic ---
+// --- DAPTA "Llamada IA" Sending Logic ---
+// Migrated from HiveAI to DAPTA API
+// Required ENV vars: DAPTA_API_URL, DAPTA_API_KEY
 export async function sendAiCall(
   contact: string,
-  callType: string,
+  callType: string, // No longer used by DAPTA, kept for signature compatibility (internal metadata)
   templateParams: Record<string, any>
 ): Promise<{ success: boolean; messageId?: string; error?: string; providerResponse?: any }> {
-    
-  const hiveApiToken = process.env.HIVEAI_API_TOKEN;
-  if (!hiveApiToken) {
-    console.error("HiveAI API token (HIVEAI_API_TOKEN) is not configured in environment variables.");
-    return { success: false, error: "HiveAI API token no configurado." };
+
+  // Configuration - Read from environment variables
+  const daptaApiKey = process.env.DAPTA_API_KEY;
+  const rawDaptaApiUrl = process.env.DAPTA_API_URL || "https://api.dapta.ai/api/e1b76ceb27df1c6e/sendcalls";
+
+  // Validate configuration
+  if (!daptaApiKey) {
+    console.error("[DAPTA] API key (DAPTA_API_KEY) is not configured in environment variables.");
+    return { success: false, error: "DAPTA API key no configurado." };
   }
 
-  const HIVEAI_API_URL = "https://genesis.hiveai.aidtogrow.cloud/api/calls";
-  
-  // Clean the number of any non-digit characters
+  if (!rawDaptaApiUrl) {
+    console.error("[DAPTA] API URL (DAPTA_API_URL) is not configured in environment variables.");
+    return { success: false, error: "DAPTA API URL no configurado." };
+  }
+
+  // Clean and validate URL
+  const DAPTA_API_URL = rawDaptaApiUrl.trim().replace(/;+$/, '');
+  try {
+    new URL(DAPTA_API_URL);
+  } catch(e) {
+    console.error(`[DAPTA] Invalid API URL: ${DAPTA_API_URL}`);
+    return { success: false, error: "DAPTA API URL no es válida." };
+  }
+
+  // Normalize phone number to E.164 format: +502XXXXXXXX
   let cleanedContact = contact.replace(/\D/g, '');
-  // Ensure it has the +502 prefix
   if (!cleanedContact.startsWith('502')) {
-      cleanedContact = `502${cleanedContact}`;
+    cleanedContact = `502${cleanedContact}`;
   }
   const fullPhoneNumber = `+${cleanedContact}`;
 
+  // Generate current_time in ISO 8601 format
+  const currentTime = new Date().toISOString();
 
+  // Build request body according to DAPTA specification
+  // IMPORTANT: DAPTA only requires these 3 fields (no call_type, nombre_agente, nombre_empresa)
   const body = {
-    call_type: callType,
-    nombre_cliente: templateParams.nombre_cliente || "Cliente", // Default value if not provided
-    nombre_agente: templateParams.nombre_agente || "Agente Virtual",
-    nombre_empresa: templateParams.nombre_empresa || "Génesis Empresarial",
-    phone_number: fullPhoneNumber,
-    // Add optional parameters from the template
-    ...templateParams
+    to_number: fullPhoneNumber,
+    nombre_cliente: templateParams.nombre_cliente || "Cliente",
+    current_time: currentTime
   };
 
+  // Secure logging - hide phone number suffix and don't log sensitive params
+  console.log(`[DAPTA] Initiating AI call to ${fullPhoneNumber.substring(0, 8)}***`);
+
   try {
-    const response = await fetch(HIVEAI_API_URL, {
+    const response = await fetch(DAPTA_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': hiveApiToken,
+        // TODO: If DAPTA requires different auth format (e.g., 'x-api-key'), change here
+        'Authorization': `Bearer ${daptaApiKey}`,
       },
       body: JSON.stringify(body),
     });
 
-    // Handle cases where the response might not have a body
+    // Parse response based on content-type
     let responseData: any = {};
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.indexOf("application/json") !== -1) {
-        responseData = await response.json();
+      responseData = await response.json();
     } else {
-        responseData = { text: await response.text() };
+      responseData = { text: await response.text() };
     }
 
     if (response.ok) {
-      return { success: true, messageId: `hiveai_req_${Date.now()}`, providerResponse: responseData };
+      // Extract message ID from DAPTA response (try common field names)
+      const messageId = responseData?.call_id || responseData?.id || responseData?.request_id || `dapta_req_${Date.now()}`;
+
+      // Clean sensitive data from provider response before storing in DB
+      const safeProviderResponse = { ...responseData };
+      delete safeProviderResponse.api_key;
+      delete safeProviderResponse.apiKey;
+      delete safeProviderResponse.token;
+
+      return {
+        success: true,
+        messageId,
+        providerResponse: safeProviderResponse
+      };
     } else {
-      const errorMessage = responseData?.detail || responseData?.message || 'Failed to initiate AI call via HiveAI';
+      const errorMessage = responseData?.detail || responseData?.message || responseData?.error || 'Failed to initiate AI call via DAPTA';
+      console.error(`[DAPTA] API error: ${errorMessage}`, responseData);
       return { success: false, error: errorMessage, providerResponse: responseData };
     }
   } catch (e: any) {
+    console.error(`[DAPTA] Exception calling ${fullPhoneNumber.substring(0, 8)}***:`, e.message);
     return { success: false, error: e.message, providerResponse: { error: e.toString() } };
   }
 }
@@ -633,9 +669,11 @@ async function getRecipientsForCampaign(
 
 
         let paramsToExtract = [...(template.parameters || [])];
-        
+
         if (template.type === 'llamada-ia') {
-            const mandatoryAiCallParams = ['nombre_cliente', 'nombre_agente', 'nombre_empresa'];
+            // DAPTA only requires nombre_cliente (current_time is generated server-side)
+            // Previously required: nombre_agente, nombre_empresa (no longer needed)
+            const mandatoryAiCallParams = ['nombre_cliente'];
             paramsToExtract = Array.from(new Set([...paramsToExtract, ...mandatoryAiCallParams]));
         }
 
