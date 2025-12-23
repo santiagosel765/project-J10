@@ -464,12 +464,12 @@ export default function CreateTemplateForm() {
                 name="templateContent"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Tipo de Llamada (call_type)</FormLabel>
+                        <FormLabel>Tipo de Llamada (metadata interna)</FormLabel>
                         <FormControl>
                             <Input placeholder="Ej: ventas, cobranza, recordatorio" {...field} />
                         </FormControl>
                         <FormDescription>
-                            Este es el valor que se enviará a la API como <code>call_type</code>.
+                            Identificador interno de la plantilla (no se envía a DAPTA API).
                         </FormDescription>
                         <FormMessage />
                     </FormItem>
@@ -663,8 +663,8 @@ export default function CreateTemplateForm() {
                 )}
               </div>
               <FormDescription>
-                {templateType === 'llamada-ia' 
-                    ? "Parámetros opcionales que enviará la API. Los obligatorios (nombre_cliente, etc.) se obtendrán de la consulta de campaña."
+                {templateType === 'llamada-ia'
+                    ? "Parámetros opcionales adicionales. El obligatorio 'nombre_cliente' se obtiene de la consulta de campaña."
                     : "Lista los parámetros separados por comas. El sistema los detectará del contenido al guardar. 'contacto' es implícito y no debe listarse."}
               </FormDescription>
               <FormMessage />
